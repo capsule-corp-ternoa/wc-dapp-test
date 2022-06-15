@@ -1,13 +1,13 @@
 {
   "files": {
-    "main.js": "/static/js/main.2cd5e9dc.js",
+    "main.js": "/static/js/main.43032b06.js",
     "static/media/walletconnect.png": "/static/media/walletconnect.7e6bf370c713eb0d587e.png",
     "static/media/erc20.svg": "/static/media/erc20.385d75abac6228dbde1fe0e697b1d2d2.svg",
     "index.html": "/index.html",
     "static/media/eth.svg": "/static/media/eth.de6424d099b55a8ed7f849df40e1c960.svg",
-    "main.2cd5e9dc.js.map": "/static/js/main.2cd5e9dc.js.map"
+    "main.43032b06.js.map": "/static/js/main.43032b06.js.map"
   },
   "entrypoints": [
-    "static/js/main.2cd5e9dc.js"
+    "static/js/main.43032b06.js"
   ]
 }
