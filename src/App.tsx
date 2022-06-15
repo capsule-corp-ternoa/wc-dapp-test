@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { version } from "@walletconnect/sign-client/package.json";
+import packageInfo from "@walletconnect/sign-client/package.json";
 
 import Banner from "./components/Banner";
 import Blockchain from "./components/Blockchain";
@@ -220,7 +220,7 @@ export default function App() {
     return !accounts.length && !Object.keys(balances).length ? (
       <SLanding center>
         <Banner />
-        <h6>{`Using v${version || "2.0.0-beta"}`}</h6>
+        <h6>{`Using v${packageInfo.version || "2.0.0-beta"}`}</h6>
         <SButtonContainer>
           <h6>Select chains:</h6>
           <SToggleContainer>
