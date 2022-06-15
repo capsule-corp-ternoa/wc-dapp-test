@@ -553,6 +553,7 @@ export function JsonRpcContextProvider({ children }: { children: ReactNode | Rea
             request: {
               method: DEFAULT_POLKADOT_METHODS.POLKADOT_SIGN_MESSAGE,
               params: {
+                pubKey: address,
                 message: "This is a test message",
               },
             },
