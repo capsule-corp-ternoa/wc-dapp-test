@@ -30,6 +30,7 @@ interface IContext {
   client: Client | undefined;
   session: SessionTypes.Struct | undefined;
   connect: (pairing?: { topic: string }) => Promise<void>;
+  autoConnect: () => Promise<void>;
   disconnect: () => Promise<void>;
   isInitializing: boolean;
   chains: string[];
@@ -106,6 +107,29 @@ export function ClientContextProvider({ children }: { children: ReactNode | Reac
     setSolanaPublicKeys(getPublicKeysFromAccounts(allNamespaceAccounts));
     await getAccountBalances(allNamespaceAccounts);
   }, []);
+
+  const autoConnect = useCallback(async () => {
+    if (typeof client === "undefined") {
+      throw new Error("WalletConnect is not initialized");
+    }
+    try {
+      const requiredNamespaces = getRequiredNamespaces([
+        "polkadot:91b171bb158e2d3848fa23a9f1c25182",
+      ]);
+      const { uri, approval } = await client.connect({
+        requiredNamespaces,
+      });
+      const rnView = (window as any).ReactNativeWebView;
+      rnView.postMessage(JSON.stringify({ data: uri, action: "WC_PAIR" }));
+      const session = await approval();
+      console.log("Established session:", session);
+      await onSessionConnected(session);
+    } catch (e: any) {
+      console.error(e);
+      alert(e.message);
+      // ignore rejection
+    }
+  }, [client, onSessionConnected]);
 
   const connect = useCallback(
     async pairing => {
@@ -250,6 +274,7 @@ export function ClientContextProvider({ children }: { children: ReactNode | Reac
       client,
       session,
       connect,
+      autoConnect,
       disconnect,
       setChains,
     }),
@@ -264,6 +289,7 @@ export function ClientContextProvider({ children }: { children: ReactNode | Reac
       client,
       session,
       connect,
+      autoConnect,
       disconnect,
       setChains,
     ],

@@ -666,7 +666,7 @@ export function JsonRpcContextProvider({
             method: DEFAULT_POLKADOT_METHODS.POLKADOT_SIGN_MESSAGE,
             address,
             valid: isValid,
-            result: signature,
+            result: message,
           };
         } catch (error: any) {
           console.log("the error", error);

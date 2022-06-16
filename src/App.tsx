@@ -46,6 +46,7 @@ export default function App() {
     client,
     session,
     connect,
+    autoConnect,
     disconnect,
     chains,
     accounts,
@@ -69,6 +70,14 @@ export default function App() {
   } = useJsonRpc();
 
   const { chainData } = useChainData();
+  const isRNApp = (window as any).isRNApp;
+
+  useEffect(() => {
+    if (isRNApp && !!client && !isInitializing) {
+      autoConnect();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isRNApp, client, isInitializing]);
 
   // Close the pairing modal after a session is established.
   useEffect(() => {
@@ -81,13 +90,7 @@ export default function App() {
     if (typeof client === "undefined") {
       throw new Error("WalletConnect is not initialized");
     }
-    // Suggest existing pairings (if any).
-    if (client.pairing.values.length) {
-      openPairingModal();
-    } else {
-      // If no existing pairings are available, trigger `WalletConnectClient.connect`.
-      connect();
-    }
+    connect();
   };
 
   const onPing = async () => {
@@ -118,11 +121,26 @@ export default function App() {
     };
 
     return [
-      { method: DEFAULT_EIP155_METHODS.ETH_SEND_TRANSACTION, callback: onSendTransaction },
-      { method: DEFAULT_EIP155_METHODS.ETH_SIGN_TRANSACTION, callback: onSignTransaction },
-      { method: DEFAULT_EIP155_METHODS.PERSONAL_SIGN, callback: onSignPersonalMessage },
-      { method: DEFAULT_EIP155_METHODS.ETH_SIGN + " (standard)", callback: onEthSign },
-      { method: DEFAULT_EIP155_METHODS.ETH_SIGN_TYPED_DATA, callback: onSignTypedData },
+      {
+        method: DEFAULT_EIP155_METHODS.ETH_SEND_TRANSACTION,
+        callback: onSendTransaction,
+      },
+      {
+        method: DEFAULT_EIP155_METHODS.ETH_SIGN_TRANSACTION,
+        callback: onSignTransaction,
+      },
+      {
+        method: DEFAULT_EIP155_METHODS.PERSONAL_SIGN,
+        callback: onSignPersonalMessage,
+      },
+      {
+        method: DEFAULT_EIP155_METHODS.ETH_SIGN + " (standard)",
+        callback: onEthSign,
+      },
+      {
+        method: DEFAULT_EIP155_METHODS.ETH_SIGN_TYPED_DATA,
+        callback: onSignTypedData,
+      },
     ];
   };
 
@@ -136,8 +154,14 @@ export default function App() {
       await cosmosRpc.testSignAmino(chainId, address);
     };
     return [
-      { method: DEFAULT_COSMOS_METHODS.COSMOS_SIGN_DIRECT, callback: onSignDirect },
-      { method: DEFAULT_COSMOS_METHODS.COSMOS_SIGN_AMINO, callback: onSignAmino },
+      {
+        method: DEFAULT_COSMOS_METHODS.COSMOS_SIGN_DIRECT,
+        callback: onSignDirect,
+      },
+      {
+        method: DEFAULT_COSMOS_METHODS.COSMOS_SIGN_AMINO,
+        callback: onSignAmino,
+      },
     ];
   };
 
@@ -151,19 +175,28 @@ export default function App() {
       await solanaRpc.testSignMessage(chainId, address);
     };
     return [
-      { method: DEFAULT_SOLANA_METHODS.SOL_SIGN_TRANSACTION, callback: onSignTransaction },
-      { method: DEFAULT_SOLANA_METHODS.SOL_SIGN_MESSAGE, callback: onSignMessage },
+      {
+        method: DEFAULT_SOLANA_METHODS.SOL_SIGN_TRANSACTION,
+        callback: onSignTransaction,
+      },
+      {
+        method: DEFAULT_SOLANA_METHODS.SOL_SIGN_MESSAGE,
+        callback: onSignMessage,
+      },
     ];
   };
 
   const getPolkadotActions = (): AccountAction[] => {
     const onSignMessage = async (chainId: string, address: string) => {
-      console.log('chainID', chainId);
+      console.log("chainID", chainId);
       openRequestModal();
       await polkadotRcp.testSignMessage(chainId, address);
     };
     return [
-      { method: DEFAULT_POLKADOT_METHODS.POLKADOT_SIGN_MESSAGE, callback: onSignMessage },
+      {
+        method: DEFAULT_POLKADOT_METHODS.POLKADOT_SIGN_MESSAGE,
+        callback: onSignMessage,
+      },
     ];
   };
 
@@ -192,7 +225,7 @@ export default function App() {
 
   const handleChainSelectionClick = (chainId: string) => {
     if (chains.includes(chainId)) {
-      setChains(chains.filter(chain => chain !== chainId));
+      setChains(chains.filter((chain) => chain !== chainId));
     } else {
       setChains([...chains, chainId]);
     }
@@ -205,9 +238,13 @@ export default function App() {
         if (typeof client === "undefined") {
           throw new Error("WalletConnect is not initialized");
         }
-        return <PairingModal pairings={client.pairing.values} connect={connect} />;
+        return (
+          <PairingModal pairings={client.pairing.values} connect={connect} />
+        );
       case "request":
-        return <RequestModal pending={isRpcRequestPending} result={rpcResult} />;
+        return (
+          <RequestModal pending={isRpcRequestPending} result={rpcResult} />
+        );
       case "ping":
         return <PingModal pending={isRpcRequestPending} result={rpcResult} />;
       default:
@@ -227,7 +264,7 @@ export default function App() {
             <p>Testnets Only?</p>
             <Toggle active={isTestnet} onClick={toggleTestnets} />
           </SToggleContainer>
-          {chainOptions.map(chainId => (
+          {chainOptions.map((chainId) => (
             <Blockchain
               key={chainId}
               chainId={chainId}
@@ -245,7 +282,7 @@ export default function App() {
       <SAccountsContainer>
         <h3>Accounts</h3>
         <SAccounts>
-          {accounts.map(account => {
+          {accounts.map((account) => {
             const [namespace, reference, address] = account.split(":");
             const chainId = `${namespace}:${reference}`;
             return (
