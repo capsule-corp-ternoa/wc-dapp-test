@@ -70,14 +70,6 @@ export default function App() {
   } = useJsonRpc();
 
   const { chainData } = useChainData();
-  const isRNApp = (window as any).isRNApp;
-
-  useEffect(() => {
-    if (isRNApp && !!client && !isInitializing) {
-      autoConnect();
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isRNApp, client, isInitializing]);
 
   // Close the pairing modal after a session is established.
   useEffect(() => {

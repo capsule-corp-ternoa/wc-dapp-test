@@ -146,11 +146,17 @@ export function ClientContextProvider({ children }: { children: ReactNode | Reac
           requiredNamespaces,
         });
 
-        // Open QRCode modal if a URI was returned (i.e. we're not connecting an existing pairing).
-        if (uri) {
-          QRCodeModal.open(uri, () => {
-            console.log("EVENT", "QR Code Modal closed");
-          });
+        const isRNApp = (window as any).isRNApp;
+        if (isRNApp) {
+          const rnView = (window as any).ReactNativeWebView;
+          rnView.postMessage(JSON.stringify({ data: uri, action: "WC_PAIR" }));
+        }else{
+          // Open QRCode modal if a URI was returned (i.e. we're not connecting an existing pairing).
+          if (uri) {
+            QRCodeModal.open(uri, () => {
+              console.log("EVENT", "QR Code Modal closed");
+            });
+          }
         }
 
         const session = await approval();
@@ -246,9 +252,9 @@ export function ClientContextProvider({ children }: { children: ReactNode | Reac
       });
 
       console.log("CREATED CLIENT: ", _client);
-      setClient(_client);
       await _subscribeToEvents(_client);
       await _checkPersistedState(_client);
+      setClient(_client);
     } catch (err) {
       throw err;
     } finally {
