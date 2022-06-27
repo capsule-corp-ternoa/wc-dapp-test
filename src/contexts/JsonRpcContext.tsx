@@ -38,14 +38,14 @@ import {
   signatureVerify,
 } from "@polkadot/util-crypto";
 import { u8aToHex } from "@polkadot/util";
-
+import { createTxHex } from 'ternoa-js'
 /**
  * Types
  */
 interface IFormattedRpcResponse {
   method?: string;
   address?: string;
-  valid: boolean;
+  valid?: boolean;
   result: string;
 }
 
@@ -117,29 +117,29 @@ export function JsonRpcContextProvider({
         address: string
       ) => Promise<IFormattedRpcResponse>
     ) =>
-    async (chainId: string, address: string) => {
-      if (typeof client === "undefined") {
-        throw new Error("WalletConnect is not initialized");
-      }
-      if (typeof session === "undefined") {
-        throw new Error("Session is not connected");
-      }
+      async (chainId: string, address: string) => {
+        if (typeof client === "undefined") {
+          throw new Error("WalletConnect is not initialized");
+        }
+        if (typeof session === "undefined") {
+          throw new Error("Session is not connected");
+        }
 
-      try {
-        setPending(true);
-        const result = await rpcRequest(chainId, address);
-        setResult(result);
-      } catch (err: any) {
-        console.error("RPC request failed: ", err);
-        setResult({
-          address,
-          valid: false,
-          result: err?.message ?? err,
-        });
-      } finally {
-        setPending(false);
-      }
-    };
+        try {
+          setPending(true);
+          const result = await rpcRequest(chainId, address);
+          setResult(result);
+        } catch (err: any) {
+          console.error("RPC request failed: ", err);
+          setResult({
+            address,
+            valid: false,
+            result: err?.message ?? err,
+          });
+        } finally {
+          setPending(false);
+        }
+      };
 
   const _verifyEip155MessageSignature = (
     message: string,
@@ -641,32 +641,55 @@ export function JsonRpcContextProvider({
         chainId: string,
         address: string
       ): Promise<IFormattedRpcResponse> => {
-        const message = "This is a test message";
+        // const message = "This is a test message";
+
+        // 0.868
+        // 9,648.955
+        const message = await createTxHex('balances', 'transfer', ['5Gc4hkfMzz6wj2ZY65aNf5cSZanernrW2F8vVXBgMg81eVt6', 100])
+        console.log('unsignedTx', message)
+
+        // const messageRaw = {
+        //   hash: unsignedTx,
+        //   tx: {
+        //     pallet: 'balances',
+        //     action: 'transfer',
+        //     args: ['5Gc4hkfMzz6wj2ZY65aNf5cSZanernrW2F8vVXBgMg81eVt6', 100]
+        //   }
+        // }
+
+        // const message = JSON.stringify(messageRaw)
+
         try {
-          const signature = await client!.request<string>({
+          const response = await client!.request<string>({
             chainId,
             topic: session!.topic,
             request: {
               method: DEFAULT_POLKADOT_METHODS.POLKADOT_SIGN_MESSAGE,
               params: {
                 pubKey: address,
-                message,
+                message: message,
               },
             },
           });
 
-          await cryptoWaitReady();
-          const isValid = isValidSignaturePolkadot(
-            message,
-            signature,
-            address
-          );
+          console.log('response', response)
+
+          // await cryptoWaitReady();
+          // const isValid = isValidSignaturePolkadot(
+          //   message,
+          //   signature,
+          //   address
+          // );
+
+          const responseObj = JSON.parse(response)
+
+          const isValid = responseObj.blockHash && responseObj.txHash
 
           return {
             method: DEFAULT_POLKADOT_METHODS.POLKADOT_SIGN_MESSAGE,
             address,
             valid: isValid,
-            result: message,
+            result: response,
           };
         } catch (error: any) {
           console.log("the error", error);
