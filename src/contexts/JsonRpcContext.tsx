@@ -654,17 +654,37 @@ export function JsonRpcContextProvider({
         // 9,648.955
         let message;
         console.log("TYPE2", message_type);
-        if (message_type === "buy_nft") {
-          message = await createTxHex("marketplace", "listNft", [
-            "893",
-            "1",
-            "10",
-          ]);
-        } else if (message_type === "transfer_balance") {
-          message = await createTxHex("balances", "transfer", [
-            "5Gc4hkfMzz6wj2ZY65aNf5cSZanernrW2F8vVXBgMg81eVt6",
-            100,
-          ]);
+        switch (message_type) {
+          case "buy_nft":
+            message = await createTxHex("marketplace", "buyNft", ["893"]);
+            break;
+          case "list_nft":
+            message = await createTxHex("marketplace", "listNft", [
+              "893",
+              "1",
+              "10",
+            ]);
+            break;
+          case "transfer_balance":
+            message = await createTxHex("balances", "transfer", [
+              "5Gc4hkfMzz6wj2ZY65aNf5cSZanernrW2F8vVXBgMg81eVt6",
+              100,
+            ]);
+            break;
+          case "create_nft":
+            message = await createTxHex("nft", "createNft", [
+              "testNft",
+              0,
+              undefined,
+              false,
+            ]);
+            break;
+          case "transfer_nft":
+            message = await createTxHex("nft", "transferNft", [
+              893,
+              "5Gc4hkfMzz6wj2ZY65aNf5cSZanernrW2F8vVXBgMg81eVt6",
+            ]);
+            break;
         }
         console.log("unsignedTx", message);
 

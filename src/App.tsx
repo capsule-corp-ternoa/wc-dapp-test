@@ -181,15 +181,25 @@ export default function App() {
   const getPolkadotActions = (): AccountAction[] => {
     const onSignMessage =
       (message_type: string) => async (chainId: string, address: string) => {
-        console.log("chainID", chainId);
         openRequestModal();
-        console.log("TYPE", message_type);
         await polkadotRcp.testSignMessage(chainId, address, message_type);
       };
     return [
       {
         method: "buy nft",
         callback: onSignMessage("buy_nft"),
+      },
+      {
+        method: "list nft",
+        callback: onSignMessage("list_nft"),
+      },
+      {
+        method: "create nft",
+        callback: onSignMessage("create_nft"),
+      },
+      {
+        method: "transfer nft",
+        callback: onSignMessage("transfer_nft"),
       },
       {
         method: "transfer balance",
