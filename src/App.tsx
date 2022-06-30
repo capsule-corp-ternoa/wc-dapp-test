@@ -179,15 +179,21 @@ export default function App() {
   };
 
   const getPolkadotActions = (): AccountAction[] => {
-    const onSignMessage = async (chainId: string, address: string) => {
-      console.log("chainID", chainId);
-      openRequestModal();
-      await polkadotRcp.testSignMessage(chainId, address);
-    };
+    const onSignMessage =
+      (message_type: string) => async (chainId: string, address: string) => {
+        console.log("chainID", chainId);
+        openRequestModal();
+        console.log("TYPE", message_type);
+        await polkadotRcp.testSignMessage(chainId, address, message_type);
+      };
     return [
       {
-        method: DEFAULT_POLKADOT_METHODS.POLKADOT_SIGN_MESSAGE,
-        callback: onSignMessage,
+        method: "buy nft",
+        callback: onSignMessage("buy_nft"),
+      },
+      {
+        method: "transfer balance",
+        callback: onSignMessage("transfer_balance"),
       },
     ];
   };

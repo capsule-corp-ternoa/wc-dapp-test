@@ -38,7 +38,7 @@ import {
   signatureVerify,
 } from "@polkadot/util-crypto";
 import { u8aToHex } from "@polkadot/util";
-import { createTxHex } from 'ternoa-js'
+import { createTxHex } from "ternoa-js";
 /**
  * Types
  */
@@ -50,6 +50,11 @@ interface IFormattedRpcResponse {
 }
 
 type TRpcRequestCallback = (chainId: string, address: string) => Promise<void>;
+type PolkadotTestSignMessage = (
+  chainId: string,
+  address: string,
+  message_type: string
+) => Promise<void>;
 
 interface IContext {
   ping: () => Promise<void>;
@@ -69,7 +74,7 @@ interface IContext {
     testSignTransaction: TRpcRequestCallback;
   };
   polkadotRcp: {
-    testSignMessage: TRpcRequestCallback;
+    testSignMessage: PolkadotTestSignMessage;
   };
   rpcResult?: IFormattedRpcResponse | null;
   isRpcRequestPending: boolean;
@@ -114,32 +119,33 @@ export function JsonRpcContextProvider({
     (
       rpcRequest: (
         chainId: string,
-        address: string
+        address: string,
+        message_type?: string
       ) => Promise<IFormattedRpcResponse>
     ) =>
-      async (chainId: string, address: string) => {
-        if (typeof client === "undefined") {
-          throw new Error("WalletConnect is not initialized");
-        }
-        if (typeof session === "undefined") {
-          throw new Error("Session is not connected");
-        }
+    async (chainId: string, address: string, message_type?: string) => {
+      if (typeof client === "undefined") {
+        throw new Error("WalletConnect is not initialized");
+      }
+      if (typeof session === "undefined") {
+        throw new Error("Session is not connected");
+      }
 
-        try {
-          setPending(true);
-          const result = await rpcRequest(chainId, address);
-          setResult(result);
-        } catch (err: any) {
-          console.error("RPC request failed: ", err);
-          setResult({
-            address,
-            valid: false,
-            result: err?.message ?? err,
-          });
-        } finally {
-          setPending(false);
-        }
-      };
+      try {
+        setPending(true);
+        const result = await rpcRequest(chainId, address, message_type);
+        setResult(result);
+      } catch (err: any) {
+        console.error("RPC request failed: ", err);
+        setResult({
+          address,
+          valid: false,
+          result: err?.message ?? err,
+        });
+      } finally {
+        setPending(false);
+      }
+    };
 
   const _verifyEip155MessageSignature = (
     message: string,
@@ -639,14 +645,28 @@ export function JsonRpcContextProvider({
     testSignMessage: _createJsonRpcRequestHandler(
       async (
         chainId: string,
-        address: string
+        address: string,
+        message_type?: string
       ): Promise<IFormattedRpcResponse> => {
         // const message = "This is a test message";
 
         // 0.868
         // 9,648.955
-        const message = await createTxHex('balances', 'transfer', ['5Gc4hkfMzz6wj2ZY65aNf5cSZanernrW2F8vVXBgMg81eVt6', 100])
-        console.log('unsignedTx', message)
+        let message;
+        console.log("TYPE2", message_type);
+        if (message_type === "buy_nft") {
+          message = await createTxHex("marketplace", "listNft", [
+            "893",
+            "1",
+            "10",
+          ]);
+        } else if (message_type === "transfer_balance") {
+          message = await createTxHex("balances", "transfer", [
+            "5Gc4hkfMzz6wj2ZY65aNf5cSZanernrW2F8vVXBgMg81eVt6",
+            100,
+          ]);
+        }
+        console.log("unsignedTx", message);
 
         // const messageRaw = {
         //   hash: unsignedTx,
@@ -672,7 +692,7 @@ export function JsonRpcContextProvider({
             },
           });
 
-          console.log('response', response)
+          console.log("response", response);
 
           // await cryptoWaitReady();
           // const isValid = isValidSignaturePolkadot(
@@ -681,9 +701,9 @@ export function JsonRpcContextProvider({
           //   address
           // );
 
-          const responseObj = JSON.parse(response)
+          const responseObj = JSON.parse(response);
 
-          const isValid = responseObj.blockHash && responseObj.txHash
+          const isValid = responseObj.blockHash && responseObj.txHash;
 
           return {
             method: DEFAULT_POLKADOT_METHODS.POLKADOT_SIGN_MESSAGE,
