@@ -205,6 +205,10 @@ export default function App() {
         method: "transfer balance",
         callback: onSignMessage("transfer_balance"),
       },
+      {
+        method: "set royalty (unknown)",
+        callback: onSignMessage("set_royalty"),
+      },
     ];
   };
 
