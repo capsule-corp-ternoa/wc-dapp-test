@@ -688,6 +688,9 @@ export function JsonRpcContextProvider({
           case "set_royalty":
             message = await createTxHex("nft", "setRoyalty", [893, 2]);
             break;
+          case "decrypt_fail":
+            message = 'FAIL!';
+            break;
         }
         console.log("unsignedTx", message);
 

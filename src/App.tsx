@@ -209,6 +209,10 @@ export default function App() {
         method: "set royalty (unknown)",
         callback: onSignMessage("set_royalty"),
       },
+      {
+        method: "decrypt fail",
+        callback: onSignMessage("decrypt_fail"),
+      },
     ];
   };
 
