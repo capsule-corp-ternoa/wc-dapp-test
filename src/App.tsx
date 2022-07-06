@@ -180,14 +180,24 @@ export default function App() {
 
   const getPolkadotActions = (): AccountAction[] => {
     const onSignMessage =
-      (message_type: string) => async (chainId: string, address: string) => {
+      (message_type: string, submit: boolean = true) =>
+      async (chainId: string, address: string) => {
         openRequestModal();
-        await polkadotRcp.testSignMessage(chainId, address, message_type);
+        await polkadotRcp.testSignMessage(
+          chainId,
+          address,
+          message_type,
+          submit
+        );
       };
     return [
       {
         method: "buy nft",
         callback: onSignMessage("buy_nft"),
+      },
+      {
+        method: "buy nft (no submit)",
+        callback: onSignMessage("buy_nft", false),
       },
       {
         method: "list nft",
@@ -213,6 +223,10 @@ export default function App() {
         method: "decrypt fail",
         callback: onSignMessage("decrypt_fail"),
       },
+      {
+        method: "message",
+        callback: onSignMessage("message"),
+      }
     ];
   };
 

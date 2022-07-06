@@ -53,7 +53,8 @@ type TRpcRequestCallback = (chainId: string, address: string) => Promise<void>;
 type PolkadotTestSignMessage = (
   chainId: string,
   address: string,
-  message_type: string
+  message_type: string,
+  submit: boolean
 ) => Promise<void>;
 
 interface IContext {
@@ -120,10 +121,16 @@ export function JsonRpcContextProvider({
       rpcRequest: (
         chainId: string,
         address: string,
-        message_type?: string
+        message_type?: string,
+        submit?: boolean
       ) => Promise<IFormattedRpcResponse>
     ) =>
-    async (chainId: string, address: string, message_type?: string) => {
+    async (
+      chainId: string,
+      address: string,
+      message_type?: string,
+      submit?: boolean
+    ) => {
       if (typeof client === "undefined") {
         throw new Error("WalletConnect is not initialized");
       }
@@ -133,7 +140,7 @@ export function JsonRpcContextProvider({
 
       try {
         setPending(true);
-        const result = await rpcRequest(chainId, address, message_type);
+        const result = await rpcRequest(chainId, address, message_type, submit);
         setResult(result);
       } catch (err: any) {
         console.error("RPC request failed: ", err);
@@ -646,33 +653,34 @@ export function JsonRpcContextProvider({
       async (
         chainId: string,
         address: string,
-        message_type?: string
+        message_type?: string,
+        submit?: boolean
       ): Promise<IFormattedRpcResponse> => {
         // const message = "This is a test message";
 
         // 0.868
         // 9,648.955
-        let message;
-        console.log("TYPE2", message_type);
+        let hash = undefined;
+        let message = undefined;
         switch (message_type) {
           case "buy_nft":
-            message = await createTxHex("marketplace", "buyNft", ["893"]);
+            hash = await createTxHex("marketplace", "buyNft", ["893"]);
             break;
           case "list_nft":
-            message = await createTxHex("marketplace", "listNft", [
+            hash = await createTxHex("marketplace", "listNft", [
               "893",
               "1",
               "10",
             ]);
             break;
           case "transfer_balance":
-            message = await createTxHex("balances", "transfer", [
+            hash = await createTxHex("balances", "transfer", [
               "5Gc4hkfMzz6wj2ZY65aNf5cSZanernrW2F8vVXBgMg81eVt6",
               100,
             ]);
             break;
           case "create_nft":
-            message = await createTxHex("nft", "createNft", [
+            hash = await createTxHex("nft", "createNft", [
               "testNft",
               0,
               undefined,
@@ -680,19 +688,21 @@ export function JsonRpcContextProvider({
             ]);
             break;
           case "transfer_nft":
-            message = await createTxHex("nft", "transferNft", [
+            hash = await createTxHex("nft", "transferNft", [
               893,
               "5Gc4hkfMzz6wj2ZY65aNf5cSZanernrW2F8vVXBgMg81eVt6",
             ]);
             break;
           case "set_royalty":
-            message = await createTxHex("nft", "setRoyalty", [893, 2]);
+            hash = await createTxHex("nft", "setRoyalty", [893, 2]);
             break;
           case "decrypt_fail":
-            message = 'FAIL!';
+            hash = "FAIL!";
+            break;
+          case "message":
+            message = "Hi!";
             break;
         }
-        console.log("unsignedTx", message);
 
         // const messageRaw = {
         //   hash: unsignedTx,
@@ -713,23 +723,34 @@ export function JsonRpcContextProvider({
               method: DEFAULT_POLKADOT_METHODS.POLKADOT_SIGN_MESSAGE,
               params: {
                 pubKey: address,
-                message: message,
+                request: {
+                  hash,
+                  nonce: 1,
+                  validity: null,
+                  submit,
+                  message,
+                },
               },
             },
           });
 
           console.log("response", response);
 
-          // await cryptoWaitReady();
-          // const isValid = isValidSignaturePolkadot(
-          //   message,
-          //   signature,
-          //   address
-          // );
-
           const responseObj = JSON.parse(response);
+          let isValid = false;
 
-          const isValid = responseObj.blockHash && responseObj.txHash;
+          if (message && responseObj.signedMessageHash) {
+            await cryptoWaitReady();
+            isValid = isValidSignaturePolkadot(
+              message,
+              responseObj.signedMessageHash,
+              address
+            );
+          } else {
+            isValid =
+              (responseObj.blockHash && responseObj.txHash) ||
+              !!responseObj.signedTxHash;
+          }
 
           return {
             method: DEFAULT_POLKADOT_METHODS.POLKADOT_SIGN_MESSAGE,
