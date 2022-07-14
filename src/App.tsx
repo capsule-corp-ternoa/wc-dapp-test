@@ -63,6 +63,7 @@ export default function App() {
     cosmosRpc,
     solanaRpc,
     polkadotRcp,
+    ternoaRcp,
     isRpcRequestPending,
     rpcResult,
     isTestnet,
@@ -178,12 +179,12 @@ export default function App() {
     ];
   };
 
-  const getPolkadotActions = (): AccountAction[] => {
+  const getTernoaActions = (): AccountAction[] => {
     const onSignMessage =
       (message_type: string, submit: boolean = true) =>
       async (chainId: string, address: string) => {
         openRequestModal();
-        await polkadotRcp.testSignMessage(
+        await ternoaRcp.testSignMessage(
           chainId,
           address,
           message_type,
@@ -239,10 +240,10 @@ export default function App() {
         return getCosmosActions();
       case "solana":
         return getSolanaActions();
-      case "polkadot":
-        return getPolkadotActions();
+      // case "polkadot":
+      //   return getPolkadotActions();
       case "ternoa":
-        return getPolkadotActions();
+        return getTernoaActions();
       default:
         break;
     }
