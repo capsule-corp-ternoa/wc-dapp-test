@@ -226,7 +226,7 @@ export default function App() {
       {
         method: "message",
         callback: onSignMessage("message"),
-      }
+      },
     ];
   };
 
@@ -241,6 +241,8 @@ export default function App() {
         return getSolanaActions();
       case "polkadot":
         return getPolkadotActions();
+      case "ternoa":
+        return getPolkadotActions();
       default:
         break;
     }
@@ -251,6 +253,7 @@ export default function App() {
     const nextIsTestnetState = !isTestnet;
     setIsTestnet(nextIsTestnetState);
     setLocaleStorageTestnetFlag(nextIsTestnetState);
+    setChains([]);
   };
 
   const handleChainSelectionClick = (chainId: string) => {

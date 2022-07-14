@@ -8,7 +8,7 @@ export const DEFAULT_MAIN_CHAINS = [
   // "eip155:42220",
   // "cosmos:cosmoshub-4",
   // "solana:4sGjMW1sUnHzSxGspuhpqLDx6wiyjNtZ",
-  "polkadot:91b171bb158e2d3848fa23a9f1c25182",
+  "ternoa:6859c81ca95ef624c9dfe4dc6e3381c3",
 ];
 
 export const DEFAULT_TEST_CHAINS = [
@@ -19,9 +19,8 @@ export const DEFAULT_TEST_CHAINS = [
   // "eip155:421611",
   // "eip155:44787",
   // "solana:8E9rvCKLFQia2Y35HXjjpWzj8weVo44K",
-  "polkadot:91b171bb158e2d3848fa23a9f1c25182",
+  "ternoa:18bcdb75a0bba577b084878db2dc2546",
 ];
-
 export const DEFAULT_CHAINS = [...DEFAULT_MAIN_CHAINS, ...DEFAULT_TEST_CHAINS];
 
 export const DEFAULT_PROJECT_ID = process.env.REACT_APP_PROJECT_ID;
@@ -81,5 +80,17 @@ export enum DEFAULT_POLKADOT_METHODS {
 }
 
 export enum DEFAULT_POLKADOT_EVENTS {
-  POLKADOT_TEST_EVENT = 'polkadot_event_test'
+  POLKADOT_TEST_EVENT = "polkadot_event_test",
+}
+
+
+/**
+ * TERNOA
+ */
+ export enum DEFAULT_TERNOA_METHODS {
+  TERNOA_SIGN_MESSAGE = "sign_message",
+}
+
+export enum DEFAULT_TERNOA_EVENTS {
+  TERNOA_EVENT = "ternoa_event_test",
 }

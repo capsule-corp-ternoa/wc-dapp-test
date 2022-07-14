@@ -113,9 +113,7 @@ export function ClientContextProvider({ children }: { children: ReactNode | Reac
       throw new Error("WalletConnect is not initialized");
     }
     try {
-      const requiredNamespaces = getRequiredNamespaces([
-        "polkadot:91b171bb158e2d3848fa23a9f1c25182",
-      ]);
+      const requiredNamespaces = getRequiredNamespaces(chains);
       const { uri, approval } = await client.connect({
         requiredNamespaces,
       });
@@ -129,7 +127,7 @@ export function ClientContextProvider({ children }: { children: ReactNode | Reac
       alert(e.message);
       // ignore rejection
     }
-  }, [client, onSessionConnected]);
+  }, [client, onSessionConnected, chains]);
 
   const connect = useCallback(
     async pairing => {

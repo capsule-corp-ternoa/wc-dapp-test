@@ -30,6 +30,7 @@ import {
   DEFAULT_EIP155_METHODS,
   DEFAULT_POLKADOT_METHODS,
   DEFAULT_SOLANA_METHODS,
+  DEFAULT_TERNOA_METHODS,
 } from "../constants";
 import { useChainData } from "./ChainDataContext";
 import {
@@ -50,7 +51,7 @@ interface IFormattedRpcResponse {
 }
 
 type TRpcRequestCallback = (chainId: string, address: string) => Promise<void>;
-type PolkadotTestSignMessage = (
+type TernoaTestSignMessage = (
   chainId: string,
   address: string,
   message_type: string,
@@ -75,7 +76,10 @@ interface IContext {
     testSignTransaction: TRpcRequestCallback;
   };
   polkadotRcp: {
-    testSignMessage: PolkadotTestSignMessage;
+    testSignMessage: any;
+  };
+  ternoaRcp: {
+    testSignMessage: TernoaTestSignMessage;
   };
   rpcResult?: IFormattedRpcResponse | null;
   isRpcRequestPending: boolean;
@@ -648,7 +652,7 @@ export function JsonRpcContextProvider({
     ),
   };
 
-  const polkadotRcp = {
+  const ternoaRcp = {
     testSignMessage: _createJsonRpcRequestHandler(
       async (
         chainId: string,
@@ -720,13 +724,13 @@ export function JsonRpcContextProvider({
             chainId,
             topic: session!.topic,
             request: {
-              method: DEFAULT_POLKADOT_METHODS.POLKADOT_SIGN_MESSAGE,
+              method: DEFAULT_TERNOA_METHODS.TERNOA_SIGN_MESSAGE,
               params: {
                 pubKey: address,
                 request: {
                   hash,
                   nonce: 1,
-                  validity: null,
+                  validity: 1,
                   submit,
                   message,
                 },
@@ -753,7 +757,7 @@ export function JsonRpcContextProvider({
           }
 
           return {
-            method: DEFAULT_POLKADOT_METHODS.POLKADOT_SIGN_MESSAGE,
+            method: DEFAULT_TERNOA_METHODS.TERNOA_SIGN_MESSAGE,
             address,
             valid: isValid,
             result: response,
@@ -773,7 +777,8 @@ export function JsonRpcContextProvider({
         ethereumRpc,
         cosmosRpc,
         solanaRpc,
-        polkadotRcp,
+        polkadotRcp: { testSignMessage: null },
+        ternoaRcp,
         rpcResult: result,
         isRpcRequestPending: pending,
         isTestnet,
